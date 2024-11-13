@@ -1,0 +1,14 @@
+PROMPT
+It's one a.m. and your paper's barely hit a hundred words. Eight dollars and seven hundred calories of tomorrow's regrets sits on a scratched-up brown plastic tray in front of you. Just as you start digging in, a commotion develops at the counter.
+
+"Excuse me, sir, you have to pay for that," the cashier says. The customer she's talking to is a tall, slender guy, with black hair and sunglasses, in a white shirt and dark pants that look both anonymous and expensive. He has a greasy bag clutched in one fist.
+
+"Charge it to the room," he replies, turning to go. 
+
+"Sir, this is an Arby's," she says. Nice, how often does she get to actually use that line? "You can't charge it to the room."
+
+He stares at her, apparently baffled. 
+
+1. Offer to pay for him.
+2. Ask what's wrong.
+3. Keep observing the situation.

@@ -1,0 +1,55 @@
+STORY OUTLINE - SCENES
+Scene 0 Major Choices
+Pay for Jun's food: You and Jun leave the restaurant. Proceed to Scene 1.
+Help Jun leave the restaurant without paying: You and Jun run away from the restaurant. Proceed to Scene 2. 
+Get into a dispute with restaurant security: You and Jun are both thrown out of the restaurant. Proceed to Scene 3.
+
+Scene 1 Prompt
+Despite the late hour, it's bright outside the Arby's, thanks to the full moon. Mentally, you flit between congratulating yourself on your generosity and admitting that you probably did it because your new friend is cute. In fact, he's kind of even cuter with his mouth absolutely stuffed with fries. 
+
+Scene 1 Major Choices
+1. Reach 10 approval points with Jun: Jun offers you tickets for his show in two nights. Proceed to Scene 4.
+2. Reach -3 approval points with Jun: Jun leaves angrily. End.
+3. Do not reach either threshold after 15 exchanges: Jun leaves for his hotel. Proceed to Scene 5.
+
+Scene 2 Prompt
+Fortunately, you go to college here, so you know exactly where to go: the tunnels. They require a student ID to get in, and only a student used to using them to avoid the bitter winter nights could navigate through them. You urge Jun to follow you into the tunnels.
+
+Scene 2 Major Choices
+
+
+
+1. You meet Jun at an Arby's...
+	1. You're both thrown out 
+	2. You pay for him
+	3. You help him dine and dash
+2. Your gram blows up the next day...
+	1. Your friends, reporters, randos
+	2. Some other options:
+		1. A rival introduces herself (help me get in)
+		2. A bandmate introduces himself (please stay away; his phone has been taken away)
+	3. He tries to convey a place to meet that night... 
+		1. You cross paths outside the stadium
+		2. He sends a coded message through an interview
+3. You meet up that night...
+	1. He gets you the tickets ("They're paper!" he says excitedly)
+	2. You're the only ordinary girl he's ever met
+	3. What do you mean, you want to know how he lives? Everyone knows how he lives.
+	4. You could kiss him or whatever
+	5. You're interrupted by Moon, who forbids you from meeting again
+4. Your move, you can think about it during the day...
+	1. Talk to your friend or whatever
+5. Go to the concert and find a way to sneak backstage...
+	1. Talk your way through it
+	2. Sneak backstage with a disguise
+	3. Do some parkour
+	4. Use an ID you pickpocketed from Moon
+	5. Create, or have your friend create, a distraction
+6. Find him getting ready to go on...
+	1. Get him to run away with you
+	2. Offer to have a secret relationship
+	3. Convince Moon to let you go public
+	4. Decide not to disrupt his life 
+
+Running threads:
+- Your paper

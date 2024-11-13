@@ -16,20 +16,29 @@
     <script>
         let messageHistory = [];
 
+        async function initializeChat() {
+            messageHistory.push({
+                role: "user",
+                content: "Start the story"
+            });
+            await sendMessage();
+        }
+
+        window.onload = initializeChat;
+
         async function sendMessage() {
             const input = document.getElementById('user-input');
             const message = input.value.trim();
-            if (!message) return;
-
-            // Add user message to chat
-            addMessage('user', message);
-            input.value = '';
-
-            // Add message to history
-            messageHistory.push({
-                role: "user",
-                content: message
-            });
+            
+            if (!message && messageHistory.length > 0) return;
+            if (message) {
+                addMessage('user', message);
+                input.value = '';
+                messageHistory.push({
+                    role: "user",
+                    content: message
+                });
+            }
 
             try {
                 const response = await fetch('/chat', {
@@ -47,7 +56,6 @@
                     throw new Error(data.error);
                 }
 
-                // Add Claude's response to chat
                 addMessage('assistant', data.response);
                 messageHistory.push({
                     role: "assistant",
