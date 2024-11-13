@@ -9,6 +9,9 @@ anthropic = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 # Force flush of print statements
 sys.stdout.flush()
 
+# Add at top with other globals
+APPROVAL = 25  # Starting value
+
 def load_story_components():
     components = {}
     story_dir = 'story'
@@ -63,8 +66,8 @@ if story:
     try:
         initial_response = anthropic.messages.create(
             messages=CONVERSATION_HISTORY,
-            model="claude-3-sonnet-20240229",
-            max_tokens=1000,
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=2048,
             system=SYSTEM_PROMPT
         )
         print("\n=== CLAUDE'S INITIAL RESPONSE ===", flush=True)
@@ -79,34 +82,54 @@ if story:
     except Exception as e:
         print(f"ERROR: {e}", flush=True)
 
+def parse_score(response_text):
+    try:
+        # Look for "Score: XX" in the text
+        import re
+        score_match = re.search(r'Score: (-?\d+)', response_text)
+        if score_match:
+            return int(score_match.group(1))
+        return None  # Return None if no score found
+    except Exception as e:
+        print(f"Error parsing score: {e}", flush=True)
+        return None
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
+    global APPROVAL  # Allow modification of global variable
     try:
         data = request.json
-        new_message = data.get('messages', [])[-1]  # Get just the new message
+        new_message = data.get('messages', [])[-1]
         
-        # Add new message to history
         CONVERSATION_HISTORY.append(new_message)
         
-        # Send complete history to Claude
         response = anthropic.messages.create(
-            messages=CONVERSATION_HISTORY,  # Send all messages including initial story
+            messages=CONVERSATION_HISTORY,
             model="claude-3-5-sonnet-20241022",
             max_tokens=2048,
             system=SYSTEM_PROMPT
         )
         
-        # Add Claude's response to history
+        response_text = response.content[0].text
+        
+        # Parse score and only update approval if score was found
+        score = parse_score(response_text)
+        if score is not None:  # Only update if score was found
+            APPROVAL = max(0, min(100, APPROVAL + score))  # Keep between 0-100
+        
         CONVERSATION_HISTORY.append({
             "role": "assistant",
-            "content": response.content[0].text
+            "content": response_text
         })
         
-        return jsonify({"response": response.content[0].text})
+        return jsonify({
+            "response": response_text,
+            "approval": APPROVAL
+        })
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({"error": str(e)}), 500

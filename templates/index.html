@@ -7,6 +7,10 @@
 </head>
 <body>
     <div class="chat-container">
+        <div id="approval-display" style="position: fixed; right: 20px; top: 20px; 
+             background: #f0f0f0; padding: 10px; border-radius: 5px;">
+            Approval: <span id="approval-value">25</span>
+        </div>
         <div id="chat-messages" class="messages"></div>
         <div class="input-area">
             <textarea id="user-input" placeholder="Type your message..."></textarea>
@@ -56,6 +60,7 @@
                     throw new Error(data.error);
                 }
 
+                document.getElementById('approval-value').textContent = data.approval;
                 addMessage('assistant', data.response);
                 messageHistory.push({
                     role: "assistant",
