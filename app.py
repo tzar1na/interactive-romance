@@ -65,7 +65,7 @@ if story:
         "content": "This is my original creative work:\n\n" + STORY_CONTENT
     }]
     
-    # Send to Claude immediately
+    # Send first message to Claude
     try:
         initial_response = anthropic.messages.create(
             messages=CONVERSATION_HISTORY,
@@ -80,6 +80,28 @@ if story:
         CONVERSATION_HISTORY.append({
             "role": "assistant",
             "content": initial_response.content[0].text
+        })
+        
+        # Automatically send "Start the story"
+        CONVERSATION_HISTORY.append({
+            "role": "user",
+            "content": "Start the story"
+        })
+        
+        # Send second message with full history
+        start_response = anthropic.messages.create(
+            messages=CONVERSATION_HISTORY,
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=2048,
+            system=SYSTEM_PROMPT
+        )
+        print("\n=== CLAUDE'S START STORY RESPONSE ===", flush=True)
+        print(start_response.content[0].text, flush=True)
+        
+        # Add start response to history
+        CONVERSATION_HISTORY.append({
+            "role": "assistant",
+            "content": start_response.content[0].text
         })
         
     except Exception as e:
@@ -164,6 +186,12 @@ def chat():
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/get_history')
+def get_history():
+    return jsonify({
+        "history": CONVERSATION_HISTORY
+    })
 
 if __name__ == '__main__':
     print("=== FLASK APP STARTING ===", flush=True)

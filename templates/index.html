@@ -66,7 +66,7 @@
         }
 
         .input-area {
-            position: relative;  /* Change from fixed to relative */
+            position: relative;
             bottom: 0;
             left: 0;
             right: 0;
@@ -75,7 +75,22 @@
             background: white;
             border-top: 1px solid #ddd;
             gap: 8px;
-            flex-shrink: 0;  /* Prevent input area from shrinking */
+            flex-shrink: 0;
+        }
+
+        .choice-button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;  /* Make all buttons equal width */
+        }
+
+        .choice-button:hover {
+            background: #0056b3;
         }
 
         .download-button {
@@ -93,25 +108,6 @@
         .download-button:hover {
             background: #0056b3;
         }
-
-        #user-input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            resize: none;
-            height: 44px;
-        }
-
-        button {
-            padding: 8px 16px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
@@ -124,13 +120,35 @@
             <button class="download-button" onclick="downloadChat()">
                 <i class="fas fa-download"></i>
             </button>
-            <textarea id="user-input" placeholder="Type your message..."></textarea>
-            <button onclick="sendMessage()">Send</button>
+            <button class="choice-button" onclick="sendChoice(1)">1</button>
+            <button class="choice-button" onclick="sendChoice(2)">2</button>
+            <button class="choice-button" onclick="sendChoice(3)">3</button>
+            <button class="choice-button" onclick="sendChoice(4)">4</button>
         </div>
     </div>
 
     <script>
+        // Initialize message history with the automatic messages from backend
         let messageHistory = [];
+
+        // Fetch initial messages when page loads
+        window.onload = async function() {
+            try {
+                const response = await fetch('/get_history');
+                const data = await response.json();
+                messageHistory = data.history;
+                
+                // Only display Claude's start response (last message in history)
+                if (messageHistory.length > 0) {
+                    const lastMessage = messageHistory[messageHistory.length - 1];
+                    if (lastMessage.role === 'assistant') {
+                        addMessage(lastMessage.role, lastMessage.content);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
 
         function addMessage(role, content) {
             const messagesDiv = document.getElementById('chat-messages');
@@ -141,56 +159,41 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
+        async function sendChoice(number) {
+            // Add user choice to chat
+            const message = number.toString();
+            addMessage('user', message);
+            messageHistory.push({
+                role: 'user',
+                content: message
+            });
             
-            if (message) {
-                // Add user message to chat
-                addMessage('user', message);
-                messageHistory.push({
-                    role: 'user',
-                    content: message
+            try {
+                // Send to backend
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: messageHistory
+                    })
                 });
                 
-                // Clear input
-                input.value = '';
+                const data = await response.json();
                 
-                try {
-                    // Send to backend
-                    const response = await fetch('/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            messages: messageHistory
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    // Add Claude's response
-                    addMessage('assistant', data.response);
-                    messageHistory.push({
-                        role: 'assistant',
-                        content: data.response
-                    });
-                    
-                } catch (error) {
-                    console.error('Error:', error);
-                    addMessage('error', 'An error occurred. Please try again.');
-                }
+                // Add Claude's response
+                addMessage('assistant', data.response);
+                messageHistory.push({
+                    role: 'assistant',
+                    content: data.response
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('error', 'An error occurred. Please try again.');
             }
         }
-
-        // Allow Enter key to send message
-        document.getElementById('user-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
 
         // Add download function
         function downloadChat() {
