@@ -193,6 +193,67 @@ def get_history():
         "history": CONVERSATION_HISTORY
     })
 
+@app.route('/restart', methods=['POST'])
+def restart():
+    global CONVERSATION_HISTORY
+    
+    # Clear history and reload story
+    CONVERSATION_HISTORY = []
+    story = load_story_components()
+    
+    if story:
+        SYSTEM_PROMPT = story['system_prompt']
+        STORY_CONTENT = story['story_content']
+        
+        # Initialize with story content
+        CONVERSATION_HISTORY = [{
+            "role": "user",
+            "content": "This is my original creative work:\n\n" + STORY_CONTENT
+        }]
+        
+        try:
+            # Send first message to Claude
+            initial_response = anthropic.messages.create(
+                messages=CONVERSATION_HISTORY,
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=2048,
+                system=SYSTEM_PROMPT
+            )
+            
+            # Add Claude's response to history
+            CONVERSATION_HISTORY.append({
+                "role": "assistant",
+                "content": initial_response.content[0].text
+            })
+            
+            # Send "Start the story"
+            CONVERSATION_HISTORY.append({
+                "role": "user",
+                "content": "Start the story"
+            })
+            
+            # Get start response
+            start_response = anthropic.messages.create(
+                messages=CONVERSATION_HISTORY,
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=2048,
+                system=SYSTEM_PROMPT
+            )
+            
+            # Add start response to history
+            CONVERSATION_HISTORY.append({
+                "role": "assistant",
+                "content": start_response.content[0].text
+            })
+            
+            return jsonify({"history": CONVERSATION_HISTORY})
+            
+        except Exception as e:
+            print(f"ERROR: {e}", flush=True)
+            return jsonify({"error": str(e)}), 500
+            
+    return jsonify({"error": "Failed to load story"}), 500
+
 if __name__ == '__main__':
     print("=== FLASK APP STARTING ===", flush=True)
     app.run(debug=False)

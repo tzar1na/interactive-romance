@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with Claude</title>
+    <title>A Date with Jun</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -104,6 +105,76 @@
         .download-button:hover {
             background: #0056b3;
         }
+
+        .restart-button {
+            padding: 8px 12px;
+            background: #dc3545;  /* Red color to distinguish it */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .restart-button:hover {
+            background: #c82333;
+        }
+
+        /* Add styling for system messages */
+        .system {
+            background: #6c757d;  /* Gray color for system messages */
+            color: white;
+            text-align: center;
+            margin: 12px auto;  /* Center the message */
+            padding: 8px 16px;
+            border-radius: 4px;
+            max-width: fit-content;
+        }
+
+        /* Add loading message style */
+        .loading {
+            background: #6c757d;
+            color: white;
+            text-align: center;
+            margin: 12px auto;
+            padding: 8px 16px;
+            border-radius: 4px;
+            max-width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Add loading animation */
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+            width: 1.5em;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+
+        /* Add loading animation for dots */
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+            width: 1.5em;
+            display: inline-block;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
     </style>
 </head>
 <body>
@@ -117,6 +188,9 @@
             <button class="choice-button" onclick="sendChoice(2)">2</button>
             <button class="choice-button" onclick="sendChoice(3)">3</button>
             <button class="choice-button" onclick="sendChoice(4)">4</button>
+            <button class="restart-button" onclick="restartStory()">
+                <i class="fas fa-arrow-rotate-left"></i>
+            </button>
         </div>
     </div>
 
@@ -152,6 +226,11 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
+        function scrollToBottom() {
+            const messagesDiv = document.getElementById('chat-messages');
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
         async function sendChoice(number) {
             // Add user choice to chat
             const message = number.toString();
@@ -161,8 +240,21 @@
                 content: message
             });
             
+            // Add loading state in Claude's bubble style
+            const messagesDiv = document.getElementById('chat-messages');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            
+            // Add loading content
+            const loadingContent = document.createElement('span');
+            loadingContent.textContent = 'Thinking';
+            loadingContent.className = 'loading-dots';
+            loadingDiv.appendChild(loadingContent);
+            
+            messagesDiv.appendChild(loadingDiv);
+            scrollToBottom();  // Force scroll after adding loading bubble
+            
             try {
-                // Send to backend
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
@@ -175,7 +267,8 @@
                 
                 const data = await response.json();
                 
-                // Add Claude's response
+                // Replace loading bubble with Claude's response
+                messagesDiv.removeChild(loadingDiv);
                 addMessage('assistant', data.response);
                 messageHistory.push({
                     role: 'assistant',
@@ -183,6 +276,7 @@
                 });
                 
             } catch (error) {
+                messagesDiv.removeChild(loadingDiv);
                 console.error('Error:', error);
                 addMessage('error', 'An error occurred. Please try again.');
             }
@@ -190,9 +284,22 @@
 
         // Add download function
         function downloadChat() {
+            // Find index of "Start the story" response
+            const startIndex = messageHistory.findIndex(msg => 
+                msg.role === 'assistant' && 
+                messageHistory[messageHistory.length - 1] !== msg // Not the latest message
+            );
+            
+            // Get only messages from that point onward
+            const relevantHistory = messageHistory.slice(startIndex);
+            
             // Convert message history to text
-            let chatText = messageHistory.map(msg => {
-                return `${msg.role.toUpperCase()}:\n${msg.content}\n\n`;
+            let chatText = relevantHistory.map(msg => {
+                if (msg.role === 'user') {
+                    return `Choice: ${msg.content}\n\n`;
+                } else {
+                    return `${msg.content}\n\n`;
+                }
             }).join('');
             
             // Create download link
@@ -200,7 +307,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'chat-history.txt';
+            a.download = 'story-history.txt';
             
             // Trigger download
             document.body.appendChild(a);
@@ -209,6 +316,40 @@
             // Cleanup
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
+        }
+
+        // Add restart function
+        async function restartStory() {
+            try {
+                // Clear chat display
+                const messagesDiv = document.getElementById('chat-messages');
+                messagesDiv.innerHTML = '';
+                
+                // Show restarting message
+                addMessage('system', 'Restarting story...');
+                
+                // Call backend to restart
+                const response = await fetch('/restart', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                messageHistory = data.history;
+                
+                // Clear the restarting message
+                messagesDiv.innerHTML = '';
+                
+                // Display only the start response
+                if (messageHistory.length > 0) {
+                    const lastMessage = messageHistory[messageHistory.length - 1];
+                    if (lastMessage.role === 'assistant') {
+                        addMessage(lastMessage.role, lastMessage.content);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('error', 'An error occurred while restarting. Please refresh the page.');
+            }
         }
     </script>
 </body>
