@@ -1,55 +1,45 @@
-STORY OUTLINE - SCENES
-Scene 0 Major Choices
-Pay for Jun's food: You and Jun leave the restaurant. Proceed to Scene 1.
-Help Jun leave the restaurant without paying: You and Jun run away from the restaurant. Proceed to Scene 2. 
-Get into a dispute with restaurant security: You and Jun are both thrown out of the restaurant. Proceed to Scene 3.
+SCENES
+Scene 1 - Inside Arby's, 1am Tuesday
+Scene Time: Between 5 and 10 minutes. Maximum of 10 inputs.
+Ending Conditions: If the cashier becomes sufficiently frustrated, she will call security and have the PC and Jun thrown out. Proceed to Scene 2. 
+If the PC pays for Jun's meal, they may choose to leave the Arby's voluntarily at any time, which would progress to Scene 2.
+If the PC colludes with Jun to escape without paying, proceed to Scene 2.
+If the PC never closely examines Jun, he leaves without her realizing who he is. 
+Scene Overview: The PC is working on a paper for class late at night in an Arby's when she notices someone trying to get food without paying. The PC needs to look more closely at the person before she recognizes him as Junsoo Han, known as Jun for short, one of the members of the globally popular band CUT.
 
-Scene 1 Prompt
-Despite the late hour, it's bright outside the Arby's, thanks to the full moon. Mentally, you flit between congratulating yourself on your generosity and admitting that you probably did it because your new friend is cute. In fact, he's kind of even cuter with his mouth absolutely stuffed with fries. 
+Scene 2 - Outside Arby's, about 1am Tuesday
+Scene Time: Between 5 and 10 minutes. Maximum of 10 inputs.
+Ending Conditions: If Jun has not left after 10 minutes, Moon will arrive and collect him. Regardless of when Jun leaves, after he does, proceed to Scene 3.
+Scene Overview: Continue any plot threads from Scene 1. If Jun has left, offer the player the choice "Go back to your dormitory."
 
-Scene 1 Major Choices
-1. Reach 10 approval points with Jun: Jun offers you tickets for his show in two nights. Proceed to Scene 4.
-2. Reach -3 approval points with Jun: Jun leaves angrily. End.
-3. Do not reach either threshold after 15 exchanges: Jun leaves for his hotel. Proceed to Scene 5.
+Scene 3 - Amasa Dormitory, early Tuesday morning
+Scene Time: Maximum of 10 inputs.
+Ending Conditions: If the PC discovers where Jun will be that night and chooses to meet him there, write a scene depicting the PC going to class in a daze and proceed to Scene 5. Otherwise, after 10 inputs, remind the player that she has to go to class and only offer her the one choice, "Hurry up and go to class." If the player chooses "Hurry up and go to class" or equivalent, proceed to Scene 4. If not, proceed to Scene 5.
+Scene Overview: Rumors on social media will spread about Jun going to the Arby's. The PC's best friend, Mia, will get involved. Some other optional introductions may occur as well, including bandmates, rivals, reporters, etc. If the player views CUT publicity materials, Jun may hint at where he might be able to meet that night. 
 
-Scene 2 Prompt
-Fortunately, you go to college here, so you know exactly where to go: the tunnels. They require a student ID to get in, and only a student used to using them to avoid the bitter winter nights could navigate through them. You urge Jun to follow you into the tunnels.
+Scene 4 - Outside the Stadium, about 10am Tuesday
+Scene Time: 5 minutes. Maximum of 5 inputs.
+Ending Conditions: After 5 minutes, proceed to Scene 5.
+Scene Overview: This scene only occurs if CUT publicity materials were not viewed. The PC, going to class, passes by the stadium where CUT is filming a promo video. She catches a glimpse of Jun, and he says something, although apparently not to her, which conveys a clue to where he will be that night at 11pm. If Mia is present, she may comment on this. Afterwards, the PC will go to class. Offer only the one choice, "Wait impatiently through class." Regardless of input, proceed to Scene 5. 
 
-Scene 2 Major Choices
+Scene 5 - Amasa Dormitory, during the day Tuesday
+Scene Time: The remainder of the day. 
+Ending Conditions: If the PC goes to Bariastra Cafe, proceed to Scene 6. If not, end the story. 
+Scene Overview: After class, the PC goes home and may consider whether or not to continue this adventure. 
 
+Scene 6 - Bariastra Cafe, 11pm Tuesday
+Scene Time: 15 minutes. Maximum of 15 inputs.
+Ending Conditions: If Jun is still at Bariastra Cafe after 15 minutes, Moon will arrive and collect him and warn the PC to stay away. Proceed to Scene 7. 
+If Jun leaves Bariastra Cafe before 15 minutes have passed, proceed to Scene 7.
+If Jun's Approval drops below 40, he will be disappointed and leave. End the story.
+Scene Overview: The PC meets Jun at Baristra Cafe, where he gives you tickets to tomorrow night's performance at 8pm. ("They're paper!" he says excitedly.) He and the PC will talk. If Jun's Approval is below 60, he will be too shy to accept physical affection. If Jun's Approval is above 60, the PC can hold hands with him. If Jun's Approval is above 80, they can kiss.  
 
+Scene 7 - Amasa Dormitory, during the day Wednesday
+Scene Time: The next day until 8pm.
+Ending Conditions: When the PC decides to go to the CUT concert, proceed to Scene 8. If the PC decides not to go or misses the concert, end the story. 
+Scene Overview: The PC can take this scene as free time to chat with her friends, work on her paper, and decide whether to attend the concert and to plan out how she might be able to meet with Jun.
 
-1. You meet Jun at an Arby's...
-	1. You're both thrown out 
-	2. You pay for him
-	3. You help him dine and dash
-2. Your gram blows up the next day...
-	1. Your friends, reporters, randos
-	2. Some other options:
-		1. A rival introduces herself (help me get in)
-		2. A bandmate introduces himself (please stay away; his phone has been taken away)
-	3. He tries to convey a place to meet that night... 
-		1. You cross paths outside the stadium
-		2. He sends a coded message through an interview
-3. You meet up that night...
-	1. He gets you the tickets ("They're paper!" he says excitedly)
-	2. You're the only ordinary girl he's ever met
-	3. What do you mean, you want to know how he lives? Everyone knows how he lives.
-	4. You could kiss him or whatever
-	5. You're interrupted by Moon, who forbids you from meeting again
-4. Your move, you can think about it during the day...
-	1. Talk to your friend or whatever
-5. Go to the concert and find a way to sneak backstage...
-	1. Talk your way through it
-	2. Sneak backstage with a disguise
-	3. Do some parkour
-	4. Use an ID you pickpocketed from Moon
-	5. Create, or have your friend create, a distraction
-6. Find him getting ready to go on...
-	1. Get him to run away with you
-	2. Offer to have a secret relationship
-	3. Convince Moon to let you go public
-	4. Decide not to disrupt his life 
-
-Running threads:
-- Your paper
+Scene 8 - Friendship Stadium, 8pm Wednesday
+Scene Time: 3 hours. Maximum of 30 inputs.
+Scene Overview: The PC attends the CUT concert. She may seek to find a way to sneak backstage before the show or after the show, or she might disrupt the concert during the performance. Some methods may include bluffing security, using a disguise, attempting some parkour to get over the security barriers without being seen, using a forged or stolen ID (if prepared in advance), or creating a distraction. Mia may be able to help with any of these. 
+If and when the PC finds Jun, she may get him to run away with her, offer to have a secret relationship, convince Moon to let you go public, or decide not to disrupt his life. End the story. 
