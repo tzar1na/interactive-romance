@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat with Claude</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -43,9 +44,14 @@
             max-width: 85%;
         }
 
+        .message ol {             /* Styles for ordered (numbered) lists */
+            margin: 0;           
+            padding-left: 16px;  
+        }
+
         .user {
             background: #007bff;
-            color: white;
+            color: rgb(15, 11, 11);
             margin-left: auto;
         }
 
@@ -63,6 +69,22 @@
             background: white;
             border-top: 1px solid #ddd;
             gap: 8px;
+        }
+
+        .download-button {
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .download-button:hover {
+            background: #0056b3;
         }
 
         #user-input {
@@ -88,10 +110,13 @@
 <body>
     <div class="chat-container">
         <div class="instructions">
-            Type <strong>"Start the story"</strong> to start playing. Type <strong>1, 2, 3,</strong> etc. to make a choice.
+            Type <strong>"Start the story"</strong> to start playing. Type <strong>1, 2, 3,</strong> etc to make a choice.
         </div>
         <div id="chat-messages"></div>
         <div class="input-area">
+            <button class="download-button" onclick="downloadChat()">
+                <i class="fas fa-download"></i>
+            </button>
             <textarea id="user-input" placeholder="Type your message..."></textarea>
             <button onclick="sendMessage()">Send</button>
         </div>
@@ -159,6 +184,29 @@
                 sendMessage();
             }
         });
+
+        // Add download function
+        function downloadChat() {
+            // Convert message history to text
+            let chatText = messageHistory.map(msg => {
+                return `${msg.role.toUpperCase()}:\n${msg.content}\n\n`;
+            }).join('');
+            
+            // Create download link
+            const blob = new Blob([chatText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chat-history.txt';
+            
+            // Trigger download
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
     </script>
 </body>
 </html>
