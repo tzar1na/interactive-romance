@@ -12,15 +12,20 @@
             box-sizing: border-box;
         }
 
-        body {
-            height: 100vh;
-            font-family: Arial, sans-serif;
+        html, body {
+            height: 100%;
+            overflow: hidden;  /* Prevent body scroll */
         }
 
         .chat-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            height: 100%;
+            position: fixed;  /* Fix container to viewport */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         .instructions {
@@ -28,13 +33,14 @@
             background: #f0f0f0;
             font-size: 0.9rem;
             text-align: center;
+            flex-shrink: 0;  /* Prevent instructions from shrinking */
         }
 
         #chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 10px;
-            padding-bottom: 60px; /* Space for input */
+            margin-bottom: 0;  /* Remove margin */
         }
 
         .message {
@@ -60,7 +66,7 @@
         }
 
         .input-area {
-            position: fixed;
+            position: relative;  /* Change from fixed to relative */
             bottom: 0;
             left: 0;
             right: 0;
@@ -69,6 +75,7 @@
             background: white;
             border-top: 1px solid #ddd;
             gap: 8px;
+            flex-shrink: 0;  /* Prevent input area from shrinking */
         }
 
         .download-button {
