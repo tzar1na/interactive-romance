@@ -11,6 +11,9 @@ sys.stdout.flush()
 
 # Add at top with other globals
 APPROVAL = 25  # Starting value
+SYSTEM_PROMPT = None  # Initialize as None
+STORY_CONTENT = None  # Initialize as None
+CONVERSATION_HISTORY = []  # Initialize as empty list
 
 def load_story_components():
     components = {}
@@ -94,13 +97,19 @@ def parse_score(response_text):
         print(f"Error parsing score: {e}", flush=True)
         return None
 
+def check_response_format(response_text):
+    # Look for a numbered list
+    import re
+    numbered_items = re.findall(r'\d\.', response_text)
+    return len(numbered_items) >= 3
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    global APPROVAL  # Allow modification of global variable
+    global APPROVAL, CONVERSATION_HISTORY, SYSTEM_PROMPT, STORY_CONTENT
     try:
         data = request.json
         new_message = data.get('messages', [])[-1]
@@ -116,10 +125,32 @@ def chat():
         
         response_text = response.content[0].text
         
-        # Parse score and only update approval if score was found
+        # Check if response is properly formatted
+        if not check_response_format(response_text):
+            print("ERROR: Improperly formatted Claude response", flush=True)
+            
+            # Reset conversation and reload story
+            CONVERSATION_HISTORY = []
+            story = load_story_components()
+            if story:
+                SYSTEM_PROMPT = story['system_prompt']
+                STORY_CONTENT = story['story_content']
+                
+                # Reinitialize conversation with story content
+                CONVERSATION_HISTORY = [{
+                    "role": "user",
+                    "content": "This is my original creative work:\n\n" + STORY_CONTENT
+                }]
+            
+            return jsonify({
+                "response": response_text + "\n\nERROR: Improperly formatted Claude response. Restarting story...",
+                "approval": APPROVAL
+            })
+        
+        # If properly formatted, continue as normal
         score = parse_score(response_text)
-        if score is not None:  # Only update if score was found
-            APPROVAL = max(0, min(100, APPROVAL + score))  # Keep between 0-100
+        if score is not None:
+            APPROVAL = max(0, min(100, APPROVAL + score))
         
         CONVERSATION_HISTORY.append({
             "role": "assistant",
