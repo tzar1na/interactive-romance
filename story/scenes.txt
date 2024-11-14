@@ -1,31 +1,32 @@
-SCENES
 Scene 1 - Inside Arby's, 1am Tuesday
-Scene Time: Between 5 and 10 minutes. Maximum of 10 inputs.
+Scene Time: About 10 minutes. Maximum of 10 inputs.
 Ending Conditions: If the cashier becomes sufficiently frustrated, she will call security and have the PC and Jun thrown out. Proceed to Scene 2. 
-If the PC pays for Jun's meal, they may choose to leave the Arby's voluntarily at any time, which would progress to Scene 2.
+If the PC has paid for Jun's meal, they may choose to leave the Arby's voluntarily at any time. This proceeds to Scene 2.
 If the PC colludes with Jun to escape without paying, proceed to Scene 2.
-If the PC never closely examines Jun, he leaves without her realizing who he is. 
-Scene Overview: The PC is working on a paper for class late at night in an Arby's when she notices someone trying to get food without paying. The PC needs to look more closely at the person before she recognizes him as Junsoo Han, known as Jun for short, one of the members of the globally popular band CUT.
+If the PC never closely examines Jun, he leaves without her realizing who he is and the story ends.
+If Jun does not trust the PC, he will not agree to sit with her and the story ends.
+Scene Overview: The PC is working on a paper for class late at night in an Arby's when she notices someone trying to get food without paying. The PC needs to look more closely at the person before she recognizes him. Once she recognizes him, explain that he is Junsoo Han, known as Jun for short, one of the members of the globally popular K-pop band CUT.
 
 Scene 2 - Outside Arby's, about 1am Tuesday
-Scene Time: Between 5 and 10 minutes. Maximum of 10 inputs.
-Ending Conditions: If Jun has not left after 10 minutes, Moon will arrive and collect him. Regardless of when Jun leaves, after he does, proceed to Scene 3.
+Scene Time: About 10 minutes. Maximum of 10 inputs.
+Ending Conditions: If Jun has not left after 10 minutes, Moon will arrive and collect him. After Jun leaves, offer the choice "Go back to your dormitory." After this choice is offered, if the player does not choose to go back to the dormitory, remind them that they are tired and should go back. Once they choose to go back, proceed to Scene 3.
 Scene Overview: Continue any plot threads from Scene 1. If Jun has left, offer the player the choice "Go back to your dormitory."
 
 Scene 3 - Amasa Dormitory, early Tuesday morning
 Scene Time: Maximum of 10 inputs.
-Ending Conditions: If the PC discovers where Jun will be that night and chooses to meet him there, write a scene depicting the PC going to class in a daze and proceed to Scene 5. Otherwise, after 10 inputs, remind the player that she has to go to class and only offer her the one choice, "Hurry up and go to class." If the player chooses "Hurry up and go to class" or equivalent, proceed to Scene 4. If not, proceed to Scene 5.
+Ending Conditions: If the PC discovers where Jun will be that night and chooses to meet him there, write a scene depicting the PC going to class in a daze and proceed to Scene 5. 
+Otherwise, after 10 inputs, remind the player that she has to go to class. After 10 inputs, offer only one choice, "Hurry up and go to class." If the player chooses "Hurry up and go to class" or an equivalent, proceed to Scene 4. After this choice is offered, if the player does not choose it, end the story. 
 Scene Overview: Rumors on social media will spread about Jun going to the Arby's. The PC's best friend, Mia, will get involved. Some other optional introductions may occur as well, including bandmates, rivals, reporters, etc. If the player views CUT publicity materials, Jun may hint at where he might be able to meet that night. 
 
 Scene 4 - Outside the Stadium, about 10am Tuesday
 Scene Time: 5 minutes. Maximum of 5 inputs.
 Ending Conditions: After 5 minutes, proceed to Scene 5.
-Scene Overview: This scene only occurs if CUT publicity materials were not viewed. The PC, going to class, passes by the stadium where CUT is filming a promo video. She catches a glimpse of Jun, and he says something, although apparently not to her, which conveys a clue to where he will be that night at 11pm. If Mia is present, she may comment on this. Afterwards, the PC will go to class. Offer only the one choice, "Wait impatiently through class." Regardless of input, proceed to Scene 5. 
+Scene Overview: This scene only occurs if CUT publicity materials were not viewed. The PC, going to class, passes by the stadium where CUT is filming a promo video. She catches a glimpse of Jun, and he says something, although apparently not to her, which conveys a clue to where he will be that night at 11pm. If Mia is present, she may comment on this. Afterwards, the PC will go to class. In class, provide only one choice, "Wait impatiently through class." Regardless of input, proceed to Scene 5. 
 
 Scene 5 - Amasa Dormitory, during the day Tuesday
 Scene Time: The remainder of the day. 
-Ending Conditions: If the PC goes to Bariastra Cafe, proceed to Scene 6. If not, end the story. 
-Scene Overview: After class, the PC goes home and may consider whether or not to continue this adventure. 
+Ending Conditions: If the PC goes to Bariastra Cafe, proceed to Scene 6. If the PC chooses not to go to Bariastra Cafe, end the story. 
+Scene Overview: The PC returns to her dormitory after class. If the PC did not turn in her paper, she should get a warning email from the teaching assistant. If the PC does not find out that she should meet Jun at Bariastra Cafe within 5 inputs, end the story. 
 
 Scene 6 - Bariastra Cafe, 11pm Tuesday
 Scene Time: 15 minutes. Maximum of 15 inputs.
@@ -37,7 +38,7 @@ Scene Overview: The PC meets Jun at Baristra Cafe, where he gives you tickets to
 Scene 7 - Amasa Dormitory, during the day Wednesday
 Scene Time: The next day until 8pm.
 Ending Conditions: When the PC decides to go to the CUT concert, proceed to Scene 8. If the PC decides not to go or misses the concert, end the story. 
-Scene Overview: The PC can take this scene as free time to chat with her friends, work on her paper, and decide whether to attend the concert and to plan out how she might be able to meet with Jun.
+Scene Overview: Resolve any side plots during this scene. If there are no side plots to resolve, offer the choice "Go through your day in a daze and then go to the stadium for the concert." 
 
 Scene 8 - Friendship Stadium, 8pm Wednesday
 Scene Time: 3 hours. Maximum of 30 inputs.
