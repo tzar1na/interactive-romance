@@ -175,28 +175,98 @@
             60% { content: '...'; }
             80%, 100% { content: ''; }
         }
+
+        /* Add styles for chat input container */
+        .chat-input-container {
+            display: none;  /* Hidden by default */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px;
+            background: white;
+            border-top: 1px solid #ddd;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: none;
+            height: 44px;
+        }
+
+        .send-button {
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            width: 44px;  /* Make it square */
+        }
+
+        .send-button:hover {
+            background: #0056b3;
+        }
+
+        .write-button {
+            padding: 8px 12px;
+            background: #007bff;  /* Same blue as numbered buttons */
+            color: white;         /* White icon */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+        }
+
+        .write-button:hover {
+            background: #0056b3;  /* Same hover state as other buttons */
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div id="chat-messages"></div>
         <div class="input-area">
-            <button class="download-button" onclick="downloadChat()">
+            <button class="download-button" onclick="downloadChat()" aria-label="Download chat history">
                 <i class="fas fa-download"></i>
             </button>
             <button class="choice-button" onclick="sendChoice(1)">1</button>
             <button class="choice-button" onclick="sendChoice(2)">2</button>
             <button class="choice-button" onclick="sendChoice(3)">3</button>
             <button class="choice-button" onclick="sendChoice(4)">4</button>
-            <button class="restart-button" onclick="restartStory()">
+            <button class="write-button" onclick="toggleChatInput()" aria-label="Write message">
+                <i class="fas fa-pen"></i>
+            </button>
+            <button class="restart-button" onclick="restartStory()" aria-label="Restart story">
                 <i class="fas fa-arrow-rotate-left"></i>
             </button>
         </div>
     </div>
 
+    <!-- Add chat input container -->
+    <div class="chat-input-container">
+        <textarea class="chat-input" placeholder="Type your message..."></textarea>
+        <button onclick="sendCustomMessage()" class="send-button" aria-label="Send message">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+
     <script>
-        // Initialize message history with the automatic messages from backend
+        // Move shared variables to the top
         let messageHistory = [];
+        let isProcessing = false;  // Declare this at the top level
 
         // Fetch initial messages when page loads
         window.onload = async function() {
@@ -351,6 +421,80 @@
                 addMessage('error', 'An error occurred while restarting. Please refresh the page.');
             }
         }
+
+        // Add new functions
+        function toggleChatInput() {
+            const container = document.querySelector('.chat-input-container');
+            const inputArea = document.querySelector('.input-area');
+            const textarea = document.querySelector('.chat-input');
+            
+            if (container.style.display === 'none' || !container.style.display) {
+                container.style.display = 'flex';
+                inputArea.style.display = 'none';
+                textarea.focus();  // Auto-focus the textarea
+            } else {
+                container.style.display = 'none';
+                inputArea.style.display = 'flex';
+            }
+        }
+
+        async function sendCustomMessage() {
+            if (isProcessing) return;
+            
+            const textarea = document.querySelector('.chat-input');
+            const message = textarea.value.trim();
+            
+            if (!message) return;
+            
+            isProcessing = true;
+            
+            try {
+                addMessage('user', message);
+                messageHistory.push({ role: 'user', content: message });
+                
+                // Hide chat input and show regular buttons immediately after sending
+                toggleChatInput();
+                
+                // Add loading state
+                const messagesDiv = document.getElementById('chat-messages');
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'message assistant';
+                const loadingContent = document.createElement('span');
+                loadingContent.textContent = 'Thinking';
+                loadingContent.className = 'loading-dots';
+                loadingDiv.appendChild(loadingContent);
+                messagesDiv.appendChild(loadingDiv);
+                scrollToBottom();
+                
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: messageHistory })
+                });
+                
+                const data = await response.json();
+                messagesDiv.removeChild(loadingDiv);
+                addMessage('assistant', data.response);
+                messageHistory.push({ role: 'assistant', content: data.response });
+                
+                // Clear input for next time
+                textarea.value = '';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('error', 'An error occurred. Please try again.');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Add event listener for Enter key
+        document.querySelector('.chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendCustomMessage();
+            }
+        });
     </script>
 </body>
 </html>
