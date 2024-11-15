@@ -233,6 +233,33 @@
         .write-button:hover {
             background: #0056b3;  /* Same hover state as other buttons */
         }
+
+        /* Add styles for evaluation messages */
+        .evaluation {
+            background: #6c757d;
+            color: white;
+            margin: 8px auto;
+            padding: 8px 16px;
+            border-radius: 4px;
+            max-width: fit-content;
+            font-size: 0.9em;
+        }
+
+        .score {
+            font-weight: bold;
+            color: #ffd700;  /* Gold color for scores */
+        }
+
+        .route-state {
+            background: #6c757d;
+            color: white;
+            text-align: center;
+            margin: 12px auto;
+            padding: 8px 16px;
+            border-radius: 4px;
+            max-width: fit-content;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -291,7 +318,11 @@
             const messagesDiv = document.getElementById('chat-messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
-            messageDiv.innerHTML = marked.parse(content);
+            
+            // Ensure content is a string and not undefined/null
+            const safeContent = content?.toString() || '';
+            messageDiv.innerHTML = marked.parse(safeContent);
+            
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
@@ -301,30 +332,38 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        async function sendChoice(number) {
-            // Add user choice to chat
-            const message = number.toString();
-            addMessage('user', message);
-            messageHistory.push({
-                role: 'user',
-                content: message
-            });
+        async function sendChoice(choice) {
+            if (isProcessing) return;
+            isProcessing = true;
             
-            // Add loading state in Claude's bubble style
-            const messagesDiv = document.getElementById('chat-messages');
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'message assistant';
-            
-            // Add loading content
-            const loadingContent = document.createElement('span');
-            loadingContent.textContent = 'Thinking';
-            loadingContent.className = 'loading-dots';
-            loadingDiv.appendChild(loadingContent);
-            
-            messagesDiv.appendChild(loadingDiv);
-            scrollToBottom();  // Force scroll after adding loading bubble
+            console.log('=== SENDING CHOICE ===');
+            console.log('Choice:', choice);
+            console.log('Current message history:', messageHistory);
             
             try {
+                // Add user choice to chat
+                const message = choice.toString();
+                addMessage('user', message);
+                messageHistory.push({
+                    role: 'user',
+                    content: message
+                });
+                
+                // Add loading state in Claude's bubble style
+                const messagesDiv = document.getElementById('chat-messages');
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'message assistant';
+                
+                // Add loading content
+                const loadingContent = document.createElement('span');
+                loadingContent.textContent = 'Thinking';
+                loadingContent.className = 'loading-dots';
+                loadingDiv.appendChild(loadingContent);
+                
+                messagesDiv.appendChild(loadingDiv);
+                scrollToBottom();
+                
+                console.log('Sending request to /chat');
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
@@ -335,20 +374,37 @@
                     })
                 });
                 
-                const data = await response.json();
+                console.log('Received response:', response);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error data:', errorData);
+                    throw new Error(errorData.error || 'Server error');
+                }
                 
-                // Replace loading bubble with Claude's response
-                messagesDiv.removeChild(loadingDiv);
+                const data = await response.json();
+                console.log('Parsed response data:', data);
+                
+                // Remove loading bubble only if it's still in the DOM
+                if (loadingDiv.parentNode === messagesDiv) {
+                    messagesDiv.removeChild(loadingDiv);
+                }
+                
                 addMessage('assistant', data.response);
                 messageHistory.push({
                     role: 'assistant',
                     content: data.response
                 });
                 
+                // Add evaluation if available
+                if (data.evaluation) {
+                    addEvaluation(data.evaluation);
+                }
+                
             } catch (error) {
-                messagesDiv.removeChild(loadingDiv);
-                console.error('Error:', error);
+                console.error('Error in sendChoice:', error);
                 addMessage('error', 'An error occurred. Please try again.');
+            } finally {
+                isProcessing = false;
             }
         }
 
@@ -477,6 +533,11 @@
                 addMessage('assistant', data.response);
                 messageHistory.push({ role: 'assistant', content: data.response });
                 
+                // Add evaluation if available
+                if (data.evaluation) {
+                    addEvaluation(data.evaluation);
+                }
+                
                 // Clear input for next time
                 textarea.value = '';
                 
@@ -495,6 +556,54 @@
                 sendCustomMessage();
             }
         });
+
+        // Update addEvaluation function
+        async function addEvaluation(evaluation) {
+            // Enhanced debug logging
+            console.log('=== EVALUATION DEBUG ===');
+            console.log('Full evaluation object:', evaluation);
+            console.log('Raw evaluation text:', evaluation?.evaluation);
+            console.log('Score:', evaluation?.score);
+            console.log('Cumulative score:', evaluation?.cumulative_score);
+            console.log('Approval:', evaluation?.approval);
+            
+            const messagesDiv = document.getElementById('chat-messages');
+            const evalDiv = document.createElement('div');
+            evalDiv.className = 'evaluation';
+            
+            // Check if evaluation properties exist before using them
+            const score = evaluation?.score ?? 0;
+            const cumulative = evaluation?.cumulative_score ?? 0;
+            const approval = evaluation?.approval;
+            const evaluationText = evaluation?.evaluation ?? '';
+            const routeState = evaluation?.route_state ?? 'no route change';
+            
+            // If route changed, add a system message to chat
+            if (evaluation?.route_changed) {
+                const routeDiv = document.createElement('div');
+                routeDiv.className = 'message system';
+                routeDiv.textContent = routeState;
+                messagesDiv.appendChild(routeDiv);
+            }
+            
+            // Parse the reaction and log results
+            let reaction = 'No reaction available';
+            const reactionMatch = evaluationText.match(/Reaction:\s*(.*?)(?=\n|$)/);
+            if (reactionMatch) {
+                reaction = reactionMatch[1];
+            }
+            
+            evalDiv.innerHTML = `
+                <div class="score">Score: ${score > 0 ? '+' + score : score}</div>
+                <div class="score">Total: ${cumulative > 0 ? '+' + cumulative : cumulative}</div>
+                ${approval ? `<div class="score">Approval: ${approval}%</div>` : ''}
+                <div>${reaction}</div>
+                <div class="route-state">${routeState}</div>
+            `;
+            
+            messagesDiv.appendChild(evalDiv);
+            scrollToBottom();
+        }
     </script>
 </body>
 </html>

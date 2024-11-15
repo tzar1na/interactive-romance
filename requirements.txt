@@ -1,4 +1,7 @@
-flask
+quart>=0.18.4
+quart-cors>=0.7.0
+# Remove or comment out: flask
+# Remove or comment out: flask-cors
 anthropic
 python-dotenv
 gunicorn
