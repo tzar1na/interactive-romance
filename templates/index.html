@@ -260,13 +260,50 @@
             max-width: fit-content;
             font-size: 0.9em;
         }
+
+        .message.system {
+            background-color: #4a5568;
+            color: #ffd700;  /* Gold color like scores */
+            font-weight: bold;
+            text-align: center;
+            margin: 12px auto;
+            padding: 8px 16px;
+            border-radius: 4px;
+            max-width: fit-content;
+        }
+
+        .debug-button {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .debug-button:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div id="chat-messages"></div>
+        <button class="debug-button" onclick="downloadDebug()" aria-label="Debug">
+            <i class="fas fa-bug"></i>
+        </button>
         <div class="input-area">
-            <button class="download-button" onclick="downloadChat()" aria-label="Download chat history">
+            <button class="download-button" onclick="downloadHistory()" aria-label="Download chat history">
                 <i class="fas fa-download"></i>
             </button>
             <button class="choice-button" onclick="sendChoice(1)">1</button>
@@ -559,50 +596,93 @@
 
         // Update addEvaluation function
         async function addEvaluation(evaluation) {
-            // Enhanced debug logging
-            console.log('=== EVALUATION DEBUG ===');
-            console.log('Full evaluation object:', evaluation);
-            console.log('Raw evaluation text:', evaluation?.evaluation);
-            console.log('Score:', evaluation?.score);
-            console.log('Cumulative score:', evaluation?.cumulative_score);
-            console.log('Approval:', evaluation?.approval);
-            
             const messagesDiv = document.getElementById('chat-messages');
             const evalDiv = document.createElement('div');
-            evalDiv.className = 'evaluation';
-            
-            // Check if evaluation properties exist before using them
-            const score = evaluation?.score ?? 0;
-            const cumulative = evaluation?.cumulative_score ?? 0;
-            const approval = evaluation?.approval;
-            const evaluationText = evaluation?.evaluation ?? '';
-            const routeState = evaluation?.route_state ?? 'no route change';
+            evalDiv.className = 'evaluation message';  // Add 'message' class to ensure it's captured
             
             // If route changed, add a system message to chat
             if (evaluation?.route_changed) {
                 const routeDiv = document.createElement('div');
                 routeDiv.className = 'message system';
-                routeDiv.textContent = routeState;
+                routeDiv.textContent = evaluation.route_state;
                 messagesDiv.appendChild(routeDiv);
             }
             
-            // Parse the reaction and log results
-            let reaction = 'No reaction available';
-            const reactionMatch = evaluationText.match(/Reaction:\s*(.*?)(?=\n|$)/);
-            if (reactionMatch) {
-                reaction = reactionMatch[1];
-            }
-            
+            // Create evaluation content
             evalDiv.innerHTML = `
-                <div class="score">Score: ${score > 0 ? '+' + score : score}</div>
-                <div class="score">Total: ${cumulative > 0 ? '+' + cumulative : cumulative}</div>
-                ${approval ? `<div class="score">Approval: ${approval}%</div>` : ''}
-                <div>${reaction}</div>
-                <div class="route-state">${routeState}</div>
+                <div class="score">Score: ${evaluation?.score > 0 ? '+' + evaluation?.score : evaluation?.score}</div>
+                <div class="score">Total: ${evaluation?.cumulative_score > 0 ? '+' + evaluation?.cumulative_score : evaluation?.cumulative_score}</div>
+                ${evaluation?.approval ? `<div class="score">Approval: ${evaluation?.approval}%</div>` : ''}
+                <div>${evaluation?.evaluation}</div>
+                <div class="route-state">${evaluation?.route_state}</div>
             `;
             
             messagesDiv.appendChild(evalDiv);
             scrollToBottom();
+        }
+
+        async function downloadHistory() {
+            try {
+                const messagesDiv = document.getElementById('chat-messages');
+                let textContent = [];
+                
+                // Iterate through all elements and add their content to the text array
+                for (const element of messagesDiv.children) {
+                    if (element.classList.contains('user')) {
+                        textContent.push(`Choice: ${element.textContent.trim()}\n`);
+                    }
+                    else if (element.classList.contains('assistant')) {
+                        textContent.push(`${element.textContent.trim()}\n`);
+                    }
+                    else if (element.classList.contains('evaluation')) {
+                        // For evaluation messages, preserve the structure
+                        const scores = [...element.querySelectorAll('.score')].map(s => s.textContent.trim());
+                        const reaction = element.querySelector('div:not(.score):not(.route-state)')?.textContent.trim();
+                        const routeState = element.querySelector('.route-state')?.textContent.trim();
+                        
+                        textContent.push('\n' + scores.join('\n'));
+                        if (reaction) textContent.push(reaction);
+                        if (routeState) textContent.push(routeState);
+                        textContent.push('\n');
+                    }
+                    else if (element.classList.contains('system')) {
+                        textContent.push(`\n${element.textContent.trim()}\n\n`);
+                    }
+                }
+                
+                // Join all text with proper spacing
+                const finalText = textContent.join('\n');
+                
+                // Create and trigger download
+                const blob = new Blob([finalText], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'story_history.txt';
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error("Error saving chat history:", error);
+            }
+        }
+
+        async function downloadDebug() {
+            try {
+                const response = await fetch('/get_history');
+                const data = await response.json();
+                const debugData = JSON.stringify(data.history, null, 2);
+                
+                const blob = new Blob([debugData], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'debug_history.json';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading debug history:', error);
+            }
         }
     </script>
 </body>

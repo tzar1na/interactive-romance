@@ -21,8 +21,28 @@ STORY_CONTENT = None  # Initialize as None
 CONVERSATION_HISTORY = []  # Initialize as empty list
 CUMULATIVE_SCORE = 0
 CURRENT_ROUTE = "starting route"
-MAX_APPROVAL = 15
-MIN_APPROVAL = -15
+TRIGGERED_GATES = set()  # Keep track of which gates have been triggered
+ACTIVE_BRANCH_CONTENT = set()  # Store active branch content strings
+
+# Add to global variables
+ROUTE_GATES = [
+    {
+        "threshold": "<-15",
+        "branch_content": "At this point the story ends."
+    },
+    {
+        "threshold": ">10",
+        "branch_content": "As the date progresses, Jun starts acting a bit flirty and opening up to PC."
+    },
+    {
+        "threshold": ">15",
+        "branch_content": "PC can have the option of holding hands with Jun, and he will respond shyly but positively."
+    },
+    {
+        "threshold": ">20",
+        "branch_content": "Jun will try to kiss PC before the end of the night."
+    },
+]
 
 def load_story_components():
     components = {}
@@ -147,25 +167,38 @@ def check_response_format(response_text):
 
 def check_route_state(cumulative_score):
     """Check and update route state based on cumulative score"""
-    global CURRENT_ROUTE
-    previous_route = CURRENT_ROUTE
+    global CURRENT_ROUTE, CONVERSATION_HISTORY, TRIGGERED_GATES, ACTIVE_BRANCH_CONTENT
     route_changed = False
+    gate_message = None
     
-    if cumulative_score >= MAX_APPROVAL:
-        CURRENT_ROUTE = "high approval route"
-        route_changed = True
-    elif cumulative_score <= MIN_APPROVAL:
-        CURRENT_ROUTE = "low approval route"
-        route_changed = True
-        
-    if route_changed:
-        return {
-            'message': f"Route Change: {CURRENT_ROUTE}",
-            'changed': True
-        }
+    # Check each route gate that hasn't been triggered yet
+    for gate in ROUTE_GATES:
+        threshold = gate['threshold']
+        if threshold not in TRIGGERED_GATES:
+            condition = f"{cumulative_score}{threshold}"
+            try:
+                if eval(condition):
+                    # Add branch content to active set
+                    ACTIVE_BRANCH_CONTENT.add(gate['branch_content'])
+                    
+                    # Update first message in conversation history
+                    if CONVERSATION_HISTORY and len(CONVERSATION_HISTORY) > 0:
+                        branch_text = "\n\n".join(ACTIVE_BRANCH_CONTENT)
+                        CONVERSATION_HISTORY[0]['content'] = f"This is my original creative work:\n\n{STORY_CONTENT}\n\n{branch_text}"
+                    
+                    route_changed = True
+                    CURRENT_ROUTE = f"gate_{threshold}"
+                    gate_message = f"Story Branch Triggered: {gate['branch_content']}"
+                    TRIGGERED_GATES.add(threshold)
+                    
+                    print(f"Route gate triggered: {threshold}", flush=True)
+                    print(f"Added branch content: {gate['branch_content']}", flush=True)
+            except Exception as e:
+                print(f"Error evaluating route gate: {e}", flush=True)
+    
     return {
-        'message': "no route change",
-        'changed': False
+        'message': gate_message if gate_message else "no route change",
+        'changed': route_changed
     }
 
 async def evaluate_response(conversation_history):
@@ -223,19 +256,15 @@ async def home():
 
 @app.route('/chat', methods=['POST'])
 async def chat():
-    global CONVERSATION_HISTORY
+    global CONVERSATION_HISTORY, ACTIVE_BRANCH_CONTENT
     try:
-        print("\n=== CHAT REQUEST RECEIVED ===", flush=True)
         data = await request.get_json()
-        if not data or 'messages' not in data:
-            print("Invalid request data", flush=True)
-            return jsonify({'error': 'Invalid request data'}), 400
-            
-        print(f"Number of messages received: {len(data['messages'])}", flush=True)
-        print("Last message:", data['messages'][-1], flush=True)
-        
-        # Update conversation history
         CONVERSATION_HISTORY = data['messages']
+        
+        # Reapply any active branch content to first message
+        if ACTIVE_BRANCH_CONTENT and len(CONVERSATION_HISTORY) > 0:
+            branch_text = "\n\n".join(ACTIVE_BRANCH_CONTENT)
+            CONVERSATION_HISTORY[0]['content'] = f"This is my original creative work:\n\n{STORY_CONTENT}\n\n{branch_text}"
         
         print("\nSending to Story Claude...", flush=True)
         # Create message without await
@@ -280,9 +309,15 @@ async def get_history():
 
 @app.route('/restart', methods=['POST'])
 async def restart():
-    global CUMULATIVE_SCORE, CURRENT_ROUTE
+    global CUMULATIVE_SCORE, CURRENT_ROUTE, CONVERSATION_HISTORY, TRIGGERED_GATES, ACTIVE_BRANCH_CONTENT
     CUMULATIVE_SCORE = 0
-    CURRENT_ROUTE = "starting route"  # Reset route state
+    CURRENT_ROUTE = "starting route"
+    TRIGGERED_GATES.clear()
+    ACTIVE_BRANCH_CONTENT.clear()  # Clear branch content on restart
+    
+    # Reset conversation history to ensure no leftover branch content
+    CONVERSATION_HISTORY = []
+    
     try:
         data = await request.get_json()
         # Clear history and reload story
