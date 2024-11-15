@@ -24,51 +24,69 @@ CURRENT_ROUTE = "starting route"
 TRIGGERED_GATES = set()  # Keep track of which gates have been triggered
 ACTIVE_BRANCH_CONTENT = set()  # Store active branch content strings
 
-# Add to global variables
-ROUTE_GATES = [
-    {
-        "threshold": "<-15",
-        "branch_content": "At this point the story ends."
-    },
-    {
-        "threshold": ">10",
-        "branch_content": "As the date progresses, Jun starts acting a bit flirty and opening up to PC."
-    },
-    {
-        "threshold": ">15",
-        "branch_content": "PC can have the option of holding hands with Jun, and he will respond shyly but positively."
-    },
-    {
-        "threshold": ">20",
-        "branch_content": "Jun will try to kiss PC before the end of the night."
-    },
-]
-
 def load_story_components():
     components = {}
     story_dir = 'story'
     
     try:
         print("\n=== LOADING FILES ===", flush=True)
-        # First load system prompt separately
         system_prompt_path = os.path.join(story_dir, 'system_prompt.txt')
         with open(system_prompt_path, 'r') as file:
             components['system_prompt'] = file.read().strip()
             print("✓ Loaded system_prompt.txt", flush=True)
             
-        # Then load other story files in specific order
         file_order = ['lore.txt', 'prompt.txt', 'scenes.txt']
         story_content = []
+        route_gates = []
+        
         for filename in file_order:
             file_path = os.path.join(story_dir, filename)
             if os.path.exists(file_path):
                 with open(file_path, 'r') as file:
-                    content = file.read().strip()
-                    story_content.append(content)
-                    print(f"✓ Loaded {filename}", flush=True)
+                    content = file.read()
                     
+                    if filename == 'scenes.txt':
+                        import json
+                        import re
+                        
+                        print("\n=== PROCESSING SCENES.TXT ===", flush=True)
+                        print("Original content:", flush=True)
+                        print(content, flush=True)
+                        
+                        # Extract and remove gate blocks
+                        gate_blocks = re.findall(r'START_ROUTE_GATE\s*(.*?)\s*END_ROUTE_GATE', 
+                                               content, re.DOTALL)
+                        clean_content = re.sub(r'START_ROUTE_GATE.*?END_ROUTE_GATE', '', 
+                                             content, flags=re.DOTALL).strip()
+                        
+                        print("\nCleaned content:", flush=True)
+                        print(clean_content, flush=True)
+                        
+                        story_content.append(clean_content)
+                        
+                        print("\nExtracted gate blocks:", flush=True)
+                        for block in gate_blocks:
+                            print(block, flush=True)
+                            try:
+                                gates = json.loads(block)
+                                if isinstance(gates, dict) and 'route_gates' in gates:
+                                    route_gates.extend(gates['route_gates'])
+                            except json.JSONDecodeError:
+                                print(f"Warning: Invalid JSON in {filename}", flush=True)
+                    else:
+                        story_content.append(content.strip())
+                    print(f"✓ Loaded {filename}", flush=True)
+        
         components['story_content'] = "\n\n".join(story_content)
+        components['route_gates'] = route_gates
+        
+        print("\n=== FINAL COMPONENTS ===", flush=True)
+        print("\nSTORY_CONTENT:", flush=True)
+        print(components['story_content'], flush=True)
+        print("\nROUTE_GATES:", flush=True)
+        print(json.dumps(components['route_gates'], indent=2), flush=True)
         print("=== FINISHED LOADING ===\n", flush=True)
+        
     except Exception as e:
         print(f"ERROR loading files: {e}", flush=True)
         return None
@@ -92,6 +110,7 @@ story = load_story_components()
 if story:
     SYSTEM_PROMPT = story['system_prompt']
     STORY_CONTENT = story['story_content']
+    ROUTE_GATES = story['route_gates']
     
     print("\n=== SENDING TO CLAUDE ===", flush=True)
     print("1. System Prompt:", flush=True)
@@ -327,6 +346,7 @@ async def restart():
         if story:
             SYSTEM_PROMPT = story['system_prompt']
             STORY_CONTENT = story['story_content']
+            ROUTE_GATES = story['route_gates']
             
             # Initialize with story content
             CONVERSATION_HISTORY = [{

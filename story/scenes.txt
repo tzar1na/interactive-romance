@@ -6,3 +6,26 @@ If the PC colludes with Jun to escape without paying, proceed to Scene 2.
 If the PC never closely examines Jun, he leaves without her realizing who he is and the story ends.
 If Jun does not trust the PC, he will not agree to sit with her and the story ends.
 Scene Overview: The PC is working on a paper for class late at night in an Arby's when she notices someone trying to get food without paying. The PC needs to look more closely at the person before she recognizes him. Once she recognizes him, explain that he is Junsoo Han, known as Jun for short, one of the members of the globally popular K-pop band CUT.
+
+START_ROUTE_GATE
+{
+  "route_gates": [
+    {
+      "threshold": "<-15",
+      "branch_content": "At this point the story ends."
+    },
+    {
+      "threshold": ">10",
+      "branch_content": "As the date progresses, Jun starts acting a bit flirty and opening up to PC."
+    },
+    {
+      "threshold": ">15",
+      "branch_content": "PC can have the option of holding hands with Jun, and he will respond shyly but positively."
+    },
+    {
+      "threshold": ">20",
+      "branch_content": "Jun will try to kiss PC before the end of the night."
+    }
+  ]
+}
+END_ROUTE_GATE
