@@ -382,4 +382,12 @@ async def restart():
 
 if __name__ == '__main__':
     print("=== QUART APP STARTING ===", flush=True)
-    app.run(debug=False, port=5000)
+    import hypercorn.asyncio
+    from hypercorn.config import Config
+    import asyncio
+    
+    config = Config()
+    config.bind = ["0.0.0.0:8080"]
+    config.workers = 1
+    
+    asyncio.run(hypercorn.asyncio.serve(app, config))

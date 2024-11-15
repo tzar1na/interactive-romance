@@ -5,3 +5,4 @@ quart-cors>=0.7.0
 anthropic
 python-dotenv
 gunicorn
+hypercorn
